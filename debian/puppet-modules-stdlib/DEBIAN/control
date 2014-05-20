@@ -1,8 +1,0 @@
-Package: puppet-modules-stdlib
-Version: 1.0-1
-Architecture: all
-Maintainer: Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
-Installed-Size: 1513
-Section: admin
-Priority: optional
-Description: puppet module stdlib
