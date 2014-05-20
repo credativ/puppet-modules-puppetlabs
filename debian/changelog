@@ -1,0 +1,5 @@
+puppet-modules-stdlib (1.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Tue, 20 May 2014 13:25:58 +0200

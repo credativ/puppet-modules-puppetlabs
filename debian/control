@@ -1,0 +1,11 @@
+Source: puppet-modules-stdlib
+Section: admin
+Priority: optional
+Maintainer: Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.5
+
+Package: puppet-modules-stdlib
+Architecture: all
+Depends: ${misc:Depends}
+Description: puppet module stdlib
