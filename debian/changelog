@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.1) unstable; urgency=low
+
+  * Upgrade stdlib to version 4.2.1 from upstream
+
+ -- Damian Lukowski <damian.lukowski@credativ.de>  Tue, 10 Jun 2014 13:33:28 +0200
+
 puppet-modules-puppetlabs (1.0) unstable; urgency=low
 
   * Initial release.
