@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.2) unstable; urgency=low
+
+  * Add puppetlabs/lvm module version 0.3.1
+
+ -- Arnd Hannemann <arnd.hannemann@credativ.de>  Thu, 12 Jun 2014 14:05:11 +0200
+
 puppet-modules-puppetlabs (1.0.1) unstable; urgency=low
 
   * Upgrade stdlib to version 4.2.1 from upstream
