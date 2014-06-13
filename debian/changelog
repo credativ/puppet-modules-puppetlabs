@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.3) unstable; urgency=low
+
+  * Add concat module, which is a dependency for the postgresql module.
+
+ -- Damian Lukowski <damian.lukowski@credativ.de>  Fri, 13 Jun 2014 13:00:14 +0200
+
 puppet-modules-puppetlabs (1.0.2) unstable; urgency=low
 
   * Add puppetlabs/lvm module version 0.3.1
