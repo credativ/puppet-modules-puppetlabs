@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.5) unstable; urgency=medium
+
+  * update puppetlabs/apt to version 1.5.0
+
+ -- Arnd Hannemann <arnd.hannemann@credativ.de>  Tue, 24 Jun 2014 15:19:45 +0200
+
 puppet-modules-puppetlabs (1.0.4) unstable; urgency=medium
 
   * Change module path
