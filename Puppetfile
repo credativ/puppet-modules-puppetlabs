@@ -1,7 +1,7 @@
 forge "http://forge.puppetlabs.com"
 
 mod 'puppetlabs/stdlib', '4.2.1'
-mod 'puppetlabs/apt'
+mod 'puppetlabs/apt', '1.5.0'
 mod 'puppetlabs/apache', '1.0.1'
 mod 'puppetlabs/postgresql', '3.3.3'
 mod 'puppetlabs/concat', '1.0.2'
