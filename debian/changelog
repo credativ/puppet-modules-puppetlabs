@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.4) unstable; urgency=medium
+
+  * Change module path
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Tue, 24 Jun 2014 10:12:22 +0200
+
 puppet-modules-puppetlabs (1.0.3) unstable; urgency=low
 
   * Add concat module, which is a dependency for the postgresql module.
