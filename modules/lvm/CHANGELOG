@@ -1,3 +1,32 @@
+2014-09-18 - Version 0.3.3+cred1
+
+Summary:
+
+This release integrates mkfs create options patch, from
+Mickael Canevet (https://github.com/mcanevet).
+
+2014-09-16 - Version 0.3.3
+
+Summary:
+
+This release fixes an issue with the metadata and fixes a bug with
+initial_size.
+
+Bugs:
+- Remove Modulefile and move dependencies to metadata.json
+- Don't set --extents=100%FREE if initial_size is set
+
+2014-06-25 - Version 0.3.2
+
+Summary:
+
+This release fixes a couple of small, but important, bugs.
+
+Bugs:
+- Fix the size comparision to be unit aware.
+- Fix exec that was missing a path attribute.
+- Add autorequire for the volume_group.
+
 2014-04-11 - Version 0.3.1
 
 Summary:

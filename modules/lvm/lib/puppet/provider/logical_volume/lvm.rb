@@ -24,7 +24,7 @@ Puppet::Type.type(:logical_volume).provide :lvm do
             args.push('--extents', @resource[:extents])
         end
 
-        if !@resource[:extents] and !@resource[:size]
+        if !@resource[:extents] and !@resource[:size] and !@resource[:initial_size]
             args.push('--extents', '100%FREE')
         end
 
@@ -91,7 +91,7 @@ Puppet::Type.type(:logical_volume).provide :lvm do
         if lvm_size_units[current_size_unit] < lvm_size_units[new_size_unit]
             resizeable = true
         elsif lvm_size_units[current_size_unit] > lvm_size_units[new_size_unit]
-            if (current_size_bytes / lvm_size_units[current_size_unit]) < (new_size_bytes / lvm_size_units[new_size_unit])
+            if (current_size_bytes * lvm_size_units[current_size_unit]) < (new_size_bytes * lvm_size_units[new_size_unit])
                 resizeable = true
             end
         elsif lvm_size_units[current_size_unit] == lvm_size_units[new_size_unit]

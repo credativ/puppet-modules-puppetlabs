@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.6) unstable; urgency=medium
+
+  * update puppetlabs/lvm to cedativ maintained version 0.3.3+cred1
+
+ -- Arnd Hannemann <arnd.hannemann@credativ.de>  Thu, 18 Sep 2014 11:06:40 +0200
+
 puppet-modules-puppetlabs (1.0.5) unstable; urgency=medium
 
   * update puppetlabs/apt to version 1.5.0
