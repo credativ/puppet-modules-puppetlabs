@@ -1,11 +1,21 @@
+# Class: apache::dev
+#
+# This class installs Apache development libraries
+#
+# Parameters:
+#
+# Actions:
+#   - Install Apache development libraries
+#
+# Requires:
+#
+# Sample Usage:
+#
 class apache::dev {
-  if $::osfamily == 'FreeBSD' and !defined(Class['apache::package']) {
-    fail('apache::dev requires apache::package; please include apache or apache::package class first')
-  }
-  include ::apache::params
-  $packages = $::apache::params::dev_packages
-  package { $packages:
-    ensure  => present,
-    require => Package['httpd'],
+  include apache::params
+
+  package { 'apache_dev_package':
+    ensure => installed,
+    name   => $apache::params::apache_dev,
   }
 }

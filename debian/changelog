@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.7) unstable; urgency=medium
+
+  * Downgrade puppetlabs/apache to a version compatible with puppet 2.x
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Tue, 23 Sep 2014 15:02:52 +0200
+
 puppet-modules-puppetlabs (1.0.6) unstable; urgency=medium
 
   * update puppetlabs/lvm to cedativ maintained version 0.3.3+cred1
