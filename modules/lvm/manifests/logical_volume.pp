@@ -1,14 +1,21 @@
-define lvm::logical_volume(
+# == Define: lvm::logical_volume
+#
+define lvm::logical_volume (
   $volume_group,
   $size,
+  $initial_size      = undef,
   $ensure            = present,
   $options           = 'defaults',
   $fs_type           = 'ext4',
   $mkfs_options      = undef,
-  $stripes           = undef,
   $mountpath         = "/${name}",
   $mountpath_require = false,
+  $extents           = undef,
+  $stripes           = undef,
+  $stripesize        = undef,
+  $range             = undef,
 ) {
+
   validate_bool($mountpath_require)
 
   if $mountpath_require {
@@ -36,10 +43,14 @@ define lvm::logical_volume(
     ensure       => $ensure,
     volume_group => $volume_group,
     size         => $size,
+    initial_size => $initial_size,
     stripes      => $stripes,
+    stripesize   => $stripesize,
+    extents      => $extents,
+    range        => $range,
   }
 
-  filesystem {"/dev/${volume_group}/${name}":
+  filesystem { "/dev/${volume_group}/${name}":
     ensure  => $ensure,
     fs_type => $fs_type,
     options => $mkfs_options,
@@ -50,7 +61,7 @@ define lvm::logical_volume(
     command => "mkdir -p ${mountpath}",
     unless  => "test -d ${mountpath}",
   } ->
-  mount {$mountpath:
+  mount { $mountpath:
     ensure  => $mount_ensure,
     device  => "/dev/${volume_group}/${name}",
     fstype  => $fs_type,
@@ -59,5 +70,4 @@ define lvm::logical_volume(
     dump    => 1,
     atboot  => true,
   }
-
 }
