@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.0.8) unstable; urgency=medium
+
+  * Update puppetlabs/lvm to upstream version 0.4.0, it now supports mkfs_options
+
+ -- Arnd Hannemann <arnd.hannemann@credativ.de>  Tue, 24 Feb 2015 11:34:35 +0100
+
 puppet-modules-puppetlabs (1.0.7) unstable; urgency=medium
 
   * Downgrade puppetlabs/apache to a version compatible with puppet 2.x
