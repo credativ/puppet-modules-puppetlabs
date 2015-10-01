@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (1.1) unstable; urgency=medium
+
+  * Update puppetlabs-lvm to Git HEAD for swap support
+
+ -- Maximilian Gaß <maximilian.gass@credativ.de>  Thu, 01 Oct 2015 13:15:49 +0200
+
 puppet-modules-puppetlabs (1.0.9) unstable; urgency=medium
 
   * Add vcsrepo to the package 
