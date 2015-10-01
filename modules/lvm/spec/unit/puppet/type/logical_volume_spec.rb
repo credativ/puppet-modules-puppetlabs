@@ -10,6 +10,8 @@ describe Puppet::Type.type(:logical_volume) do
       :extents => '80%vg',
       :ensure => :present,
       :size_is_minsize => :false,
+      :persistent => :false,
+      :minor => 100,
     }
     stub_default_provider!
       end
@@ -73,6 +75,14 @@ describe Puppet::Type.type(:logical_volume) do
     end
     it 'should support setting a value' do
       with(valid_params)[:extents].should == valid_params[:extents]
+    end
+    it 'should support only valid values' do
+      %w[ 1 1% 1%vg 1%PVS 1%FrEe 1%Origin ].each do |extent|
+        with(valid_params.merge(:extents => extent))[:extents].should == extent
+      end
+      %w[ foo 1%bar 1( 1v 1g 1f ].each do |extent|
+        specifying(valid_params.merge(:extents => extent)).should raise_error(Puppet::Error)
+      end
     end
   end
 

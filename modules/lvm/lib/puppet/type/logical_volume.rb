@@ -22,7 +22,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:initial_size) do
     desc "The initial size of the logical volume. This will only apply to newly-created volumes"
     validate do |value|
-      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPE]/i
+      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPEL]/i
         raise ArgumentError , "#{value} is not a valid logical volume size"
       end
     end
@@ -31,17 +31,35 @@ Puppet::Type.newtype(:logical_volume) do
   newproperty(:size) do
     desc "The size of the logical volume. Set to undef to use all available space"
     validate do |value|
-      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPE]/i
+      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPEL]/i
         raise ArgumentError , "#{value} is not a valid logical volume size"
       end
     end
   end
 
   newparam(:extents) do
-    desc "The  number of logical extents to allocate for the new logical volume. Set to undef to use all available space"
+    desc "The number of logical extents to allocate for the new logical volume. Set to undef to use all available space"
     validate do |value|
-      unless value =~ /^[0-9]+[%(vg|VG|pvs|PVS|free|FREE|origin|ORIGIN)]?/i
+      unless value =~ /^\d+(%(?:vg|pvs|free|origin)?)?$/i
         raise ArgumentError , "#{value} is not a valid logical volume extent"
+      end
+    end
+  end
+
+  newparam(:persistent) do
+    desc "Set to true to make the block device persistent"
+    validate do |value|
+      unless [:true, true, "true", :false, false, "false"].include?(value)
+        raise ArgumentError , "persistent must be either be true or false"
+      end
+    end
+  end
+
+  newparam(:minor) do
+    desc "Set the minor number"
+    validate do |value|
+      if value.to_i > 255 or value.to_i < 0
+        raise ArgumentError , "#{value} is not a valid value for minor. It must be an integer between 0 and 255"
       end
     end
   end
@@ -77,8 +95,17 @@ Puppet::Type.newtype(:logical_volume) do
     end
   end
 
+  newparam(:readahead) do
+    desc "The readahead count to use for the new logical volume."
+    validate do |value|
+      unless value =~ /^([0-9]+|Auto|None)/i
+        raise ArgumentError , "#{value} is not a valid readahead count"
+      end
+    end
+  end
+
   newparam(:size_is_minsize) do
-    desc "Set to true if the 'size' parameter specified, is just the 
+    desc "Set to true if the 'size' parameter specified, is just the
             minimum size you need (if the LV found is larger then the size requests
             this is just logged not causing a FAIL)"
     validate do |value|
@@ -88,6 +115,36 @@ Puppet::Type.newtype(:logical_volume) do
     end
     defaultto :false
   end
+
+
+  newproperty(:mirror) do
+      desc "The number of mirrors of the volume."
+      validate do |value|
+          unless Integer(value).between?(0, 4)
+              raise ArgumentError, "#{value} is not a valid number of mirror copies. Use 0 to un-mirror or 1-4 to set up mirroring."
+          end
+      end
+  end
+  newproperty(:mirrorlog) do
+      desc "How to store the mirror log (core, disk, mirrored)."
+      newvalues( :core, :disk, :mirrored )
+  end
+  newparam(:alloc) do
+      desc "Selects the allocation policy when a command needs to allocate Physical Extents from the Volume Group."
+      newvalues( :anywhere, :contiguous, :cling, :inherit, :normal )
+  end
+  newparam(:no_sync) do
+      desc "An optimization in lvcreate, at least on Linux."
+  end
+  newparam(:region_size) do
+      desc "A mirror is divided into regions of this size (in MB), the mirror log uses this granularity to track which regions are in sync. CAN NOT BE CHANGED on already mirrored volume. Take your mirror size in terabytes and round up that number to the next power of 2, using that number as the -R argument."
+      validate do |value|
+          unless value =~ /^[0-9]+/i
+              raise ArgumentError , "#{value} is not a valid region size in MB."
+          end
+      end
+  end
+
 
   autorequire(:volume_group) do
     @parameters[:volume_group].value

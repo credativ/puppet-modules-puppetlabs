@@ -16,15 +16,25 @@ Puppet::Type.type(:filesystem).provide :lvm do
     end
 
     def fstype
-        /TYPE=\"(\S+)\"/.match(blkid(@resource[:name]))[1]
+        /\bTYPE=\"(\S+)\"/.match(blkid(@resource[:name]))[1]
     rescue Puppet::ExecutionFailure
         nil
     end
 
     def mkfs(fs_type)
         mkfs_params = { "reiserfs" => "-q" }
-        mkfs_cmd    = ["mkfs.#{fs_type}", @resource[:name]]
-        
+
+        mkfs_cmd = @resource[:mkfs_cmd] != nil ?
+                     [@resource[:mkfs_cmd]] :
+                   case fs_type
+                   when 'swap'
+                     ["mkswap"]
+                   else
+                     ["mkfs.#{fs_type}"]
+                   end
+       
+        mkfs_cmd << @resource[:name]
+
         if mkfs_params[fs_type]
             mkfs_cmd << mkfs_params[fs_type]
         end

@@ -8,9 +8,13 @@ define lvm::volume_group (
 
   validate_hash($logical_volumes)
 
+  if ($name == undef) {
+    fail("lvm::volume_group \$name can't be undefined")
+  }
+
   physical_volume { $physical_volumes:
     ensure => $ensure,
-  }
+  } ->
 
   volume_group { $name:
     ensure           => $ensure,
