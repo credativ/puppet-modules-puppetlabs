@@ -22,7 +22,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:initial_size) do
     desc "The initial size of the logical volume. This will only apply to newly-created volumes"
     validate do |value|
-      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPE]/i
+      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPEL]/i
         raise ArgumentError , "#{value} is not a valid logical volume size"
       end
     end
@@ -31,17 +31,35 @@ Puppet::Type.newtype(:logical_volume) do
   newproperty(:size) do
     desc "The size of the logical volume. Set to undef to use all available space"
     validate do |value|
-      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPE]/i
+      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPEL]/i
         raise ArgumentError , "#{value} is not a valid logical volume size"
       end
     end
   end
 
   newparam(:extents) do
-    desc "The  number of logical extents to allocate for the new logical volume. Set to undef to use all available space"
+    desc "The number of logical extents to allocate for the new logical volume. Set to undef to use all available space"
     validate do |value|
-      unless value =~ /^[0-9]+[%(vg|VG|pvs|PVS|free|FREE|origin|ORIGIN)]?/i
+      unless value =~ /^\d+(%(?:vg|pvs|free|origin)?)?$/i
         raise ArgumentError , "#{value} is not a valid logical volume extent"
+      end
+    end
+  end
+
+  newparam(:persistent) do
+    desc "Set to true to make the block device persistent"
+    validate do |value|
+      unless [:true, true, "true", :false, false, "false"].include?(value)
+        raise ArgumentError , "persistent must be either be true or false"
+      end
+    end
+  end
+
+  newparam(:minor) do
+    desc "Set the minor number"
+    validate do |value|
+      if value.to_i > 255 or value.to_i < 0
+        raise ArgumentError , "#{value} is not a valid value for minor. It must be an integer between 0 and 255"
       end
     end
   end
@@ -87,7 +105,7 @@ Puppet::Type.newtype(:logical_volume) do
   end
 
   newparam(:size_is_minsize) do
-    desc "Set to true if the 'size' parameter specified, is just the 
+    desc "Set to true if the 'size' parameter specified, is just the
             minimum size you need (if the LV found is larger then the size requests
             this is just logged not causing a FAIL)"
     validate do |value|
