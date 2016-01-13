@@ -3,11 +3,11 @@ require File.join(File.dirname(__FILE__), '..', 'vcsrepo')
 Puppet::Type.type(:vcsrepo).provide(:svn, :parent => Puppet::Provider::Vcsrepo) do
   desc "Supports Subversion repositories"
 
-  commands :svn      => 'svn',
-           :svnadmin => 'svnadmin',
-           :svnlook  => 'svnlook'
+  optional_commands :svn      => 'svn',
+                    :svnadmin => 'svnadmin',
+                    :svnlook  => 'svnlook'
 
-  has_features :filesystem_types, :reference_tracking, :basic_auth, :configuration, :conflict
+  has_features :filesystem_types, :reference_tracking, :basic_auth, :configuration
 
   def create
     if !@resource.value(:source)
@@ -24,10 +24,8 @@ Puppet::Type.type(:vcsrepo).provide(:svn, :parent => Puppet::Provider::Vcsrepo) 
     if File.directory?(@resource.value(:path))
       # :path is an svn checkout
       return true if File.directory?(File.join(@resource.value(:path), '.svn'))
-      if File.file?(File.join(@resource.value(:path), 'format'))
-        # :path is an svn server
-        return true if svnlook('uuid', @resource.value(:path))
-      end
+      # :path is an svn server
+      return true if svnlook('uuid', @resource.value(:path))
     end
     false
   end
@@ -92,11 +90,6 @@ Puppet::Type.type(:vcsrepo).provide(:svn, :parent => Puppet::Provider::Vcsrepo) 
            else
              buildargs.push('update', '-r', desired)
            end
-
-    if @resource.value(:conflict)
-      args.push('--accept', @resource.value(:conflict))
-    end
-
     at_path do
       svn(*args)
     end

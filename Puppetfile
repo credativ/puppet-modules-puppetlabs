@@ -8,7 +8,7 @@ mod 'puppetlabs/apache', '0.0.4'
 mod 'puppetlabs/postgresql', '4.6.1'
 mod 'puppetlabs/concat', '1.2.5'
 mod 'puppetlabs/lvm', :git => 'https://github.com/puppetlabs/puppetlabs-lvm.git', :commit => '689d42a16c397fd0a6a9a0b5675c81467b8f2923' # swap support
-mod 'puppetlabs/vcsrepo', '1.3.2'
+mod 'puppetlabs/vcsrepo', '0.2.0'
 
 # mod 'ntp',
 #   :git => 'git://github.com/puppetlabs/puppetlabs-ntp.git'
