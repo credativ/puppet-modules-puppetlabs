@@ -1,7 +1,8 @@
 forge "http://forge.puppetlabs.com"
 
 mod 'puppetlabs/stdlib', '4.11.0'
-mod 'puppetlabs/apt', '2.2.1'
+# this is the last version working w/o future parser
+mod 'puppetlabs/apt', '1.8.0'
 # Can not be upgraded without changes in several modules
 mod 'puppetlabs/apache', '0.0.4'
 mod 'puppetlabs/postgresql', '4.6.1'
