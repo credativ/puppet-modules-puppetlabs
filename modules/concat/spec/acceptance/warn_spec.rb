@@ -1,10 +1,9 @@
 require 'spec_helper_acceptance'
 
-describe 'concat warn =>', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) do
+describe 'concat warn =>' do
   basedir = default.tmpdir('concat')
   context 'true should enable default warning message' do
     pp = <<-EOS
-      include concat::setup
       concat { '#{basedir}/file':
         warn  => true,
       }
@@ -23,20 +22,21 @@ describe 'concat warn =>', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfam
     EOS
 
     it 'applies the manifest twice with no stderr' do
-      expect(apply_manifest(pp, :catch_failures => true).stderr).to eq("")
-      expect(apply_manifest(pp, :catch_changes => true).stderr).to eq("")
+      apply_manifest(pp, :catch_failures => true)
+      apply_manifest(pp, :catch_changes => true)
     end
 
     describe file("#{basedir}/file") do
       it { should be_file }
-      it { should contain '# This file is managed by Puppet. DO NOT EDIT.' }
-      it { should contain '1' }
-      it { should contain '2' }
+      its(:content) {
+        should match /# This file is managed by Puppet\. DO NOT EDIT\./
+        should match /1/
+        should match /2/
+      }
     end
   end
   context 'false should not enable default warning message' do
     pp = <<-EOS
-      include concat::setup
       concat { '#{basedir}/file':
         warn  => false,
       }
@@ -55,20 +55,21 @@ describe 'concat warn =>', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfam
     EOS
 
     it 'applies the manifest twice with no stderr' do
-      expect(apply_manifest(pp, :catch_failures => true).stderr).to eq("")
-      expect(apply_manifest(pp, :catch_changes => true).stderr).to eq("")
+      apply_manifest(pp, :catch_failures => true)
+      apply_manifest(pp, :catch_changes => true)
     end
 
     describe file("#{basedir}/file") do
       it { should be_file }
-      it { should_not contain '# This file is managed by Puppet. DO NOT EDIT.' }
-      it { should contain '1' }
-      it { should contain '2' }
+      its(:content) {
+        should_not match /# This file is managed by Puppet\. DO NOT EDIT\./
+        should match /1/
+        should match /2/
+      }
     end
   end
   context '# foo should overide default warning message' do
     pp = <<-EOS
-      include concat::setup
       concat { '#{basedir}/file':
         warn  => '# foo',
       }
@@ -87,15 +88,17 @@ describe 'concat warn =>', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfam
     EOS
 
     it 'applies the manifest twice with no stderr' do
-      expect(apply_manifest(pp, :catch_failures => true).stderr).to eq("")
-      expect(apply_manifest(pp, :catch_changes => true).stderr).to eq("")
+      apply_manifest(pp, :catch_failures => true)
+      apply_manifest(pp, :catch_changes => true)
     end
 
     describe file("#{basedir}/file") do
       it { should be_file }
-      it { should contain '# foo' }
-      it { should contain '1' }
-      it { should contain '2' }
+      its(:content) {
+        should match /# foo/
+        should match /1/
+        should match /2/
+      }
     end
   end
 end
