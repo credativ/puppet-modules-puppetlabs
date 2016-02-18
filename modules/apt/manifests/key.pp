@@ -10,9 +10,11 @@
 # [*key*]
 #   _default_: +$title+, the title/name of the resource
 #
-#   Is a GPG key ID. This key ID is validated with a regex enforcing it
-#   to only contain valid hexadecimal characters, be precisely 8 or 16
-#   characters long and optionally prefixed with 0x.
+#   Is a GPG key ID or full key fingerprint. This value is validated with
+#   a regex enforcing it to only contain valid hexadecimal characters, be
+#   precisely 8 or 16 hexadecimal characters long and optionally prefixed
+#   with 0x for key IDs, or 40 hexadecimal characters long for key
+#   fingerprints.
 #
 # [*ensure*]
 #   _default_: +present+
@@ -39,7 +41,8 @@
 # [*key_server*]
 #   _default_: +undef+
 #
-#   The keyserver from where to fetch our GPG key. It defaults to
+#   The keyserver from where to fetch our GPG key. It can either be a domain
+#   name or url. It defaults to
 #   undef which results in apt_key's default keyserver being used,
 #   currently +keyserver.ubuntu.com+.
 #
@@ -56,7 +59,7 @@ define apt::key (
   $key_options = undef,
 ) {
 
-  validate_re($key, ['\A(0x)?[0-9a-fA-F]{8}\Z', '\A(0x)?[0-9a-fA-F]{16}\Z'])
+  validate_re($key, ['\A(0x)?[0-9a-fA-F]{8}\Z', '\A(0x)?[0-9a-fA-F]{16}\Z', '\A(0x)?[0-9a-fA-F]{40}\Z'])
   validate_re($ensure, ['\Aabsent|present\Z',])
 
   if $key_content {
@@ -68,9 +71,7 @@ define apt::key (
   }
 
   if $key_server {
-    if !is_domain_name($key_server) {
-      fail('$key_server must be a valid domain name')
-    }
+    validate_re($key_server,['\A((hkp|http|https):\/\/)?([a-z\d])([a-z\d-]{0,61}\.)+[a-z\d]+(:\d{2,5})?$'])
   }
 
   if $key_options {
