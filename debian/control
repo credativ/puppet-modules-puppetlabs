@@ -9,4 +9,5 @@ Standards-Version: 3.9.5
 Package: puppet-modules-puppetlabs
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: puppet-module-edestecd-clamav
 Description: puppet module stdlib
