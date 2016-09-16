@@ -1,7 +1,7 @@
 puppet-modules-puppetlabs package
 ---------------------------------
 
-This repository contains a Debian package with (some) puppetlabs puppet modules.
+This repository contains a Debian package with (some) puppetlabs and 3rdparty puppet modules.
 It can be build with
 
     dpkg-buildpackage
