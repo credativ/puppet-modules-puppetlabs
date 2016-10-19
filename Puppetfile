@@ -17,6 +17,9 @@ mod 'herculesteam/augeasproviders_shellvar', '2.2.1'
 
 mod 'edestecd/clamav', '1.0.0'
 
+mod 'systemd',
+   :git => 'git://github.com/credativ/puppet-systemd.git'
+
 # mod 'ntp',
 #   :git => 'git://github.com/puppetlabs/puppetlabs-ntp.git'
 
