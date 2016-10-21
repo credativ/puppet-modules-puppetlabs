@@ -31,6 +31,13 @@ class apache::params {
   $options       = 'Indexes FollowSymLinks MultiViews'
   $vhost_name    = '*'
 
+  $confd_dir     = $::lsbdistcodename ? {
+    "wheezy"  => '/etc/apache2/conf.d',
+    "jessie"  => '/etc/apache2/conf-available'
+  }
+
+  $verify_command = "/usr/sbin/apachectl -t"
+
   case $::operatingsystem {
     'centos', 'redhat', 'fedora', 'scientific': {
       $apache_name = 'httpd'
