@@ -39,7 +39,7 @@ define apache::custom_config (
   }
 
   if ! $verify_config or $ensure == 'absent' {
-    $notifies = Class['Apache::Service']
+    $notifies = Service['apache']
   } else {
     $notifies = undef
   }
