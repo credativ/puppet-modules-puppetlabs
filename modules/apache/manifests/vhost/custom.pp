@@ -12,7 +12,7 @@ define apache::vhost::custom(
 
   ::apache::custom_config { $filename:
     ensure        => $ensure,
-    confdir       => '/etc/apache2/sites-available'
+    confdir       => '/etc/apache2/sites-available',
     content       => $content,
     priority      => $priority,
     verify_config => $verify_config,
@@ -33,7 +33,7 @@ define apache::vhost::custom(
       owner   => 'root',
       group   => 'root',
       require => Apache::Custom_config[$filename],
-      notify  => Service['apache'],
+      notify  => Service['httpd'],
     }
   }
 }
