@@ -6,7 +6,7 @@ define apache::custom_config (
   $priority       = '25',
   $source         = undef,
   $verify_command = $::apache::params::verify_command,
-  $verify_config  = undef,
+  $verify_config  = false,
   $filename       = undef,
 ) {
 
@@ -67,7 +67,6 @@ define apache::custom_config (
       refreshonly => true,
       notify      => Class['Apache::Service'],
       before      => Exec["remove ${name} if invalid"],
-      require     => Anchor['::apache::modules_set_up']
     }
 
     exec { "remove ${name} if invalid":
