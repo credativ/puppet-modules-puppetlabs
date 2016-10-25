@@ -51,14 +51,6 @@ define apache::custom_config (
     source  => $source,
     require => Package['httpd'],
     notify  => $notifies,
-  }
-
-  if $::lsbdistcodename == "jessie" {
-    file { "/etc/apache2/conf-enabled/${_filename}":
-      ensure => link,
-      target => "${confdir}/${_filename}",
-    }
-  }
 
   if $ensure == 'present' and $verify_config {
     exec { "syntax verification for ${name}":
