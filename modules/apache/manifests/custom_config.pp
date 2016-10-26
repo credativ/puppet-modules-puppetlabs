@@ -51,7 +51,8 @@ define apache::custom_config (
     source  => $source,
     require => Package['httpd'],
     notify  => $notifies,
-
+  }
+  
   if $ensure == 'present' and $verify_config {
     exec { "syntax verification for ${name}":
       command     => $verify_command,
