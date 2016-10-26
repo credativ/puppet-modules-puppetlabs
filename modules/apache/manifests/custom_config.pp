@@ -39,7 +39,7 @@ define apache::custom_config (
   }
 
   if ! $verify_config or $ensure == 'absent' {
-    $notifies = Service['apache']
+    $notifies = Service['httpd']
   } else {
     $notifies = undef
   }
@@ -52,13 +52,13 @@ define apache::custom_config (
     require => Package['httpd'],
     notify  => $notifies,
   }
-  
+
   if $ensure == 'present' and $verify_config {
     exec { "syntax verification for ${name}":
       command     => $verify_command,
       subscribe   => File["apache_${name}"],
       refreshonly => true,
-      notify      => Class['Apache::Service'],
+      notify      => Service['httpd'],
       before      => Exec["remove ${name} if invalid"],
     }
 
