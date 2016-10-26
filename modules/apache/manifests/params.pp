@@ -33,7 +33,7 @@ class apache::params {
 
   $confd_dir     = $::lsbdistcodename ? {
     "wheezy"  => '/etc/apache2/conf.d',
-    "jessie"  => '/etc/apache2/conf-available'
+    "jessie"  => '/etc/apache2/conf-enabled'
   }
 
   $verify_command = "/usr/sbin/apachectl -t"
