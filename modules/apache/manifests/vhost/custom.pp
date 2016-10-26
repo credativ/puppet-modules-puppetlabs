@@ -20,20 +20,18 @@ define apache::vhost::custom(
 
   # NOTE(pabelanger): This code is duplicated in ::apache::vhost and needs to
   # converted into something generic.
-  if $::apache::vhost_enable_dir {
-    $vhost_symlink_ensure = $ensure ? {
-      present => link,
-      default => $ensure,
-    }
+  $vhost_symlink_ensure = $ensure ? {
+    present => link,
+    default => $ensure,
+  }
 
-    file { "${priority}-${filename}.conf symlink":
-      ensure  => link,
-      path    => "/etc/apache2/sites-enabled/${priority}-${filename}.conf",
-      target  => "/etc/apache2/sites-available/${priority}-${filename}.conf",
-      owner   => 'root',
-      group   => 'root',
-      require => Apache::Custom_config[$filename],
-      notify  => Service['httpd'],
-    }
+  file { "${priority}-${filename}.conf symlink":
+    ensure  => $vhost_symlink_ensure,
+    path    => "/etc/apache2/sites-enabled/${priority}-${filename}.conf",
+    target  => "/etc/apache2/sites-available/${priority}-${filename}.conf",
+    owner   => 'root',
+    group   => 'root',
+    require => Apache::Custom_config[$filename],
+    notify  => Service['httpd'],
   }
 }
