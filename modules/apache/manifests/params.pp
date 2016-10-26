@@ -65,6 +65,7 @@ class apache::params {
       $ssl_package = 'apache-ssl'
       $apache_dev  = 'apache-dev'
       $vdir = '/etc/apache2/sites-enabled/'
+      $vhost_enable_dir = true
     }
   }
 }
