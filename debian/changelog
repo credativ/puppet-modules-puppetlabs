@@ -1,3 +1,25 @@
+puppet-modules-puppetlabs (1.4.0) unstable; urgency=medium
+
+  [ Arnd Hannemann ]
+  * add external modules camptocamp/openldap, herculesteam/augeasproviders_core and herculesteam/augeasproviders_shellvar#
+  * mention fact that module contains non puppetlabs modules as well
+
+  [ Patrick Schoenfeld ]
+  * Add a systemd module
+  * Add apache::custom_config define
+  * Add transition type for vhosts too
+  * Several bugfixes to apache::vhost::custom port
+  * avoid symlink trickery for debian
+  * install to conf-enabled on jessie
+  * fix syntax
+  * Fix dependencies
+  * make sure we enable vhosts
+  * simplify
+
+  [ Arnd Hannemann ]
+
+ -- Maximilian Gaß <maximilian.gass@credativ.de>  Wed, 09 Nov 2016 12:59:19 +0000
+
 puppet-modules-puppetlabs (1.3) unstable; urgency=medium
 
   * Add module edestecd/clamav
