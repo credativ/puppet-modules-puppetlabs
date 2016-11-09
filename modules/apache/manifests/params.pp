@@ -31,6 +31,13 @@ class apache::params {
   $options       = 'Indexes FollowSymLinks MultiViews'
   $vhost_name    = '*'
 
+  $confd_dir     = $::lsbdistcodename ? {
+    "wheezy"  => '/etc/apache2/conf.d',
+    "jessie"  => '/etc/apache2/conf-enabled'
+  }
+
+  $verify_command = "/usr/sbin/apachectl -t"
+
   case $::operatingsystem {
     'centos', 'redhat', 'fedora', 'scientific': {
       $apache_name = 'httpd'
@@ -58,6 +65,7 @@ class apache::params {
       $ssl_package = 'apache-ssl'
       $apache_dev  = 'apache-dev'
       $vdir = '/etc/apache2/sites-enabled/'
+      $vhost_enable_dir = true
     }
   }
 }
