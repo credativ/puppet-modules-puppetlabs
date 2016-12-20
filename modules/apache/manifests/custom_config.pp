@@ -6,7 +6,7 @@ define apache::custom_config (
   $priority       = '25',
   $source         = undef,
   $verify_command = $::apache::params::verify_command,
-  $verify_config  = false,
+  $verify_config  = true,
   $filename       = undef,
 ) {
 
@@ -19,7 +19,7 @@ define apache::custom_config (
   }
 
   validate_re($ensure, '^(present|absent)$',
-    "${ensure} is not supported for ensure.
+  "${ensure} is not supported for ensure.
   Allowed values are 'present' and 'absent'.")
 
   validate_bool($verify_config)
@@ -39,7 +39,7 @@ define apache::custom_config (
   }
 
   if ! $verify_config or $ensure == 'absent' {
-    $notifies = Service['httpd']
+    $notifies = Class['Apache::Service']
   } else {
     $notifies = undef
   }
@@ -58,8 +58,9 @@ define apache::custom_config (
       command     => $verify_command,
       subscribe   => File["apache_${name}"],
       refreshonly => true,
-      notify      => Service['httpd'],
+      notify      => Class['Apache::Service'],
       before      => Exec["remove ${name} if invalid"],
+      require     => Anchor['::apache::modules_set_up'],
     }
 
     exec { "remove ${name} if invalid":
