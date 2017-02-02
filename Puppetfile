@@ -6,7 +6,7 @@ mod 'puppetlabs/apt', '1.8.0'
 mod 'puppetlabs/apache', '1.11.0'
 mod 'puppetlabs/postgresql', '4.6.1'
 mod 'puppetlabs/concat', '1.2.5'
-mod 'puppetlabs/lvm', :git => 'https://github.com/puppetlabs/puppetlabs-lvm.git', :commit => '689d42a16c397fd0a6a9a0b5675c81467b8f2923' # swap support
+mod 'puppetlabs/lvm', :git => 'https://github.com/puppetlabs/puppetlabs-lvm.git', :ref => '0.6.0' # swap support
 mod 'puppetlabs/vcsrepo', '0.2.0'
 mod 'puppetlabs/inifile', '1.6.0'
 

@@ -22,7 +22,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:initial_size) do
     desc "The initial size of the logical volume. This will only apply to newly-created volumes"
     validate do |value|
-      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPEL]/i
+      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPE]/i
         raise ArgumentError , "#{value} is not a valid logical volume size"
       end
     end
@@ -31,8 +31,27 @@ Puppet::Type.newtype(:logical_volume) do
   newproperty(:size) do
     desc "The size of the logical volume. Set to undef to use all available space"
     validate do |value|
-      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPEL]/i
+      unless value =~ /^[0-9]+(\.[0-9]+)?[KMGTPE]/i
         raise ArgumentError , "#{value} is not a valid logical volume size"
+      end
+    end
+    def insync?(is)
+      lvm_size_units = { "K" => 1, "M" => 1024, "G" => 1024**2, "T" => 1024**3, "P" => 1024**4, "E" => 1024**5 }
+      if is =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
+        current_size_bytes = $1.to_f
+        current_size_unit  = $3.upcase
+        current_size = current_size_bytes * lvm_size_units[current_size_unit]
+      end
+
+      if should =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
+        new_size_bytes = $1.to_f
+        new_size_unit  = $3.upcase
+        new_size = new_size_bytes * lvm_size_units[new_size_unit]
+      end
+      if [:true, true, "true"].include?(@resource[:size_is_minsize])
+        new_size <= current_size
+      else
+        new_size == current_size
       end
     end
   end
@@ -65,7 +84,7 @@ Puppet::Type.newtype(:logical_volume) do
   end
 
   newparam(:type) do
-    desc "Configures the logical volume type. AIX only"
+    desc "Configures the logical volume type."
   end
 
   newparam(:range) do
@@ -80,7 +99,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:stripes) do
     desc "The number of stripes to allocate for the new logical volume."
     validate do |value|
-      unless value =~ /^[0-9]+/i
+      unless value.to_s =~ /^[0-9]+$/i
         raise ArgumentError , "#{value} is not a valid stripe count"
       end
     end
@@ -89,7 +108,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:stripesize) do
     desc "The stripesize to use for the new logical volume."
     validate do |value|
-      unless value =~ /^[0-9]+/i
+      unless value.to_s =~ /^[0-9]+$/i
         raise ArgumentError , "#{value} is not a valid stripesize"
       end
     end
@@ -98,7 +117,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:readahead) do
     desc "The readahead count to use for the new logical volume."
     validate do |value|
-      unless value =~ /^([0-9]+|Auto|None)/i
+      unless value.to_s =~ /^([0-9]+|Auto|None)/i
         raise ArgumentError , "#{value} is not a valid readahead count"
       end
     end
@@ -139,7 +158,7 @@ Puppet::Type.newtype(:logical_volume) do
   newparam(:region_size) do
       desc "A mirror is divided into regions of this size (in MB), the mirror log uses this granularity to track which regions are in sync. CAN NOT BE CHANGED on already mirrored volume. Take your mirror size in terabytes and round up that number to the next power of 2, using that number as the -R argument."
       validate do |value|
-          unless value =~ /^[0-9]+/i
+          unless value.to_s =~ /^[0-9]+$/i
               raise ArgumentError , "#{value} is not a valid region size in MB."
           end
       end
