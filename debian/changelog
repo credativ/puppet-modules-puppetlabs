@@ -1,3 +1,14 @@
+puppet-modules-puppetlabs (2.0.0) unstable; urgency=medium
+
+  [ Patrick Schoenfeld ]
+  * Update apache module to latest version
+  * add module puppetlabs/inifile
+
+  [ Damian Lukowski ]
+  * lvm version 0.6.0 is the next one after c89d42, use this instead.
+
+ -- Maximilian Gaß <maximilian.gass@credativ.de>  Wed, 29 Mar 2017 11:59:15 +0000
+
 puppet-modules-puppetlabs (1.4.0) unstable; urgency=medium
 
   [ Arnd Hannemann ]
