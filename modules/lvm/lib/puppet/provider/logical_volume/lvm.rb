@@ -6,6 +6,9 @@ Puppet::Type.type(:logical_volume).provide :lvm do
              :lvextend   => 'lvextend',
              :lvs        => 'lvs',
              :resize2fs  => 'resize2fs',
+             :mkswap     => 'mkswap',
+             :swapoff    => 'swapoff',
+             :swapon     => 'swapon',
              :umount     => 'umount',
              :blkid      => 'blkid',
              :dmsetup    => 'dmsetup',
@@ -103,6 +106,10 @@ Puppet::Type.type(:logical_volume).provide :lvm do
             args.push('--minor', @resource[:minor])
         end
 
+        if @resource[:type]
+            args.push('--type', @resource[:type])
+        end
+
         args << @resource[:volume_group]
         lvcreate(*args)
     end
@@ -134,20 +141,19 @@ Puppet::Type.type(:logical_volume).provide :lvm do
     end
 
     def size=(new_size)
-        lvm_size_units = { "K" => 1, "M" => 1024, "G" => 1048576, "T" => 1073741824, "P" => 1099511627776, "E" => 1125899906842624 }
-        lvm_size_units_match = lvm_size_units.keys().join('|')
+        lvm_size_units = { "K" => 1, "M" => 1024, "G" => 1024**2, "T" => 1024**3, "P" => 1024**4, "E" => 1024**5 }
 
         resizeable = false
         current_size = size()
 
-        if current_size =~ /(\d+\.{0,1}\d{0,2})(#{lvm_size_units_match})/i
+        if current_size =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
             current_size_bytes = $1.to_f
-            current_size_unit  = $2.upcase
+            current_size_unit  = $3.upcase
         end
 
-        if new_size =~ /(\d+\.{0,1}\d{0,2})(#{lvm_size_units_match})/i
+        if new_size =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
             new_size_bytes = $1.to_f
-            new_size_unit  = $2.upcase
+            new_size_unit  = $3.upcase
         end
 
         ## Get the extend size
@@ -189,6 +195,8 @@ Puppet::Type.type(:logical_volume).provide :lvm do
               resize2fs( path) || fail( "Cannot resize file system to size #{new_size} because resize2fs failed." )
             elsif blkid_type =~ /\bTYPE=\"(xfs)\"/
               xfs_growfs( path) || fail( "Cannot resize filesystem to size #{new_size} because xfs_growfs failed." )
+            elsif blkid_type =~ /\bTYPE=\"(swap)\"/
+              swapoff( path) && mkswap( path) && swapon( path) || fail( "Cannot resize swap to size #{new_size} because mkswap failed." )
             end
 
         end
