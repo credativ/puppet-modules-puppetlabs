@@ -12,6 +12,11 @@ mod 'puppetlabs/inifile', '1.6.0'
 
 # dependencies of puppet-module-ocldap
 mod 'camptocamp/openldap', '1.15.0'
+# from git because puppet-ocldap requires openldap::server::access_wrapper
+mod 'openldap',
+    :git    => 'https://github.com/camptocamp/puppet-openldap.git',
+    :commit => '36b8a3838382e255b02a6f2edc997e69bb8a6758'
+
 mod 'herculesteam/augeasproviders_core', '2.1.3'
 mod 'herculesteam/augeasproviders_shellvar', '2.2.1'
 
