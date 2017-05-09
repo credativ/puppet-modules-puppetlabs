@@ -1,3 +1,9 @@
+puppet-modules-puppetlabs (2.1.1) unstable; urgency=medium
+
+  * actually update puppet module not only Puppetfile
+
+ -- Arnd Hannemann <arnd.hannemann@credativ.de>  Tue, 09 May 2017 11:24:38 +0200
+
 puppet-modules-puppetlabs (2.1.0) unstable; urgency=medium
 
   * update puppet openldap module to a version with openldap::server::access_wrapper

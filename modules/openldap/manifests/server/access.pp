@@ -3,10 +3,9 @@ define openldap::server::access(
   $ensure   = undef,
   $position = undef,
   $what     = undef,
-  $by       = undef,
   $suffix   = undef,
   $access   = undef,
-  $control  = undef,
+  $islast   = false,
 ) {
 
   if ! defined(Class['openldap::server']) {
@@ -14,13 +13,13 @@ define openldap::server::access(
   }
 
   if $::openldap::server::provider == 'augeas' {
-    Class['openldap::server::install'] ->
-    Openldap::Server::Access[$title] ~>
-    Class['openldap::server::service']
+    Class['openldap::server::install']
+    -> Openldap::Server::Access[$title]
+    ~> Class['openldap::server::service']
   } else {
-    Class['openldap::server::service'] ->
-    Openldap::Server::Access[$title] ->
-    Class['openldap::server']
+    Class['openldap::server::service']
+    -> Openldap::Server::Access[$title]
+    -> Class['openldap::server']
   }
 
   openldap_access { $title:
@@ -29,9 +28,8 @@ define openldap::server::access(
     provider => $::openldap::server::provider,
     target   => $::openldap::server::conffile,
     what     => $what,
-    by       => $by,
     suffix   => $suffix,
     access   => $access,
-    control  => $control,
+    islast   => $islast,
   }
 }

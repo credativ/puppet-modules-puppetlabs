@@ -9,6 +9,10 @@ Puppet::Type.newtype(:openldap_database) do
     desc "The default namevar."
   end
 
+  newparam(:relay) do
+    desc "The relay configuration."
+  end
+
   newparam(:target) do
   end
 
@@ -18,13 +22,13 @@ Puppet::Type.newtype(:openldap_database) do
 
   newproperty(:backend) do
     desc "The name of the backend."
-    newvalues('bdb', 'hdb', 'mdb', 'monitor', 'config')
+    newvalues('bdb', 'hdb', 'mdb', 'monitor', 'config', 'relay')
     defaultto do
       case Facter.value(:osfamily)
       when 'Debian'
         case Facter.value(:operatingsystem)
         when 'Debian'
-          if Facter.value(:operatingsystemmajrelease).to_i < 8
+          if Facter.value(:operatingsystemmajrelease).to_i <= 7
             'hdb'
           else
             'mdb'
@@ -35,7 +39,7 @@ Puppet::Type.newtype(:openldap_database) do
           'hdb'
         end
       when 'RedHat'
-        if Facter.value(:operatingsystemmajrelease).to_i < 7
+        if Facter.value(:operatingsystemmajrelease).to_i <= 6
           'bdb'
         else
           'hdb'
@@ -47,7 +51,7 @@ Puppet::Type.newtype(:openldap_database) do
   newproperty(:directory) do
     desc "The directory where the BDB files containing this database and associated indexes live."
     defaultto do
-      if "#{@resource[:backend]}" != "monitor" and "#{@resource[:backend]}" != "config"
+      unless [ "monitor" , "config", "relay" ].include? "#{@resource[:backend]}"
         '/var/lib/ldap'
       end
     end
@@ -117,7 +121,7 @@ Puppet::Type.newtype(:openldap_database) do
 
     newvalues(:true, :false)
     defaultto do
-      if "#{@resource[:backend]}" == "monitor" or "#{@resource[:backend]}" == "config"
+      if [ "monitor" , "config", "relay" ].include? "#{@resource[:backend]}"
         :false
       else
         :true
@@ -131,6 +135,10 @@ Puppet::Type.newtype(:openldap_database) do
 
   newproperty(:sizelimit) do
     desc "Specifies the maximum number of entries to return from a search operation."
+  end
+
+  newproperty(:dbmaxsize) do
+    desc "Specifies the maximum size of the DB in bytes."
   end
 
   newproperty(:timelimit) do
@@ -185,6 +193,21 @@ Puppet::Type.newtype(:openldap_database) do
     validate do |value|
       if value !~ /^(\*|anonymous|users|self|(dn(\.\S+)?=\S+)|(dn\.\S+=\S+)|(group(\/oc(\/at)?)?=\S+))(\s+((time(\.(soft|hard))?=((\d+)|unlimited))|(size(\.(soft|hard|unchecked))?=((\d+)|unlimited))|(size\.pr=((\d+)|noEstimate|unlimited))|(size.prtotal=((\d+)|unlimited|disabled))))+$/
         raise ArgumentError, "Invalid limit: #{value}\nLimit values must be according to syntax described at http://www.openldap.org/doc/admin24/limits.html#Per-Database%20Limits"
+      end
+    end
+  end
+
+  newproperty(:security) do
+    desc "The olcSecurity configuration."
+    correct_keys = ['transport', 'sasl', 'simple_bind', 'ssf', 'tls', 'update_sasl', 'update_ssf', 'update_tls', 'update_transport']
+    validate do |value|
+      value.each do |k, v|
+        if ! correct_keys.include? k
+            raise ArgumentError, "Invalid security key: '#{k}' for value '#{v}'\nSecurity key must be one of these value: #{correct_keys.join(', ')}\nSee olcSecurity in `man slapd-config`"
+        end
+        if ! (Float(v) rescue false)
+            raise ArgumentError, "Invalid security value: '#{v}' for key '#{k}'\nSecurity value must be a number\nSee olcSecurity in `man slapd-config`"
+        end
       end
     end
   end
