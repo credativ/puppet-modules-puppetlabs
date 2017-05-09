@@ -12,10 +12,11 @@ Puppet::Type.
   mk_resource_methods
 
   def self.instances
-    databases = slapcat("(|(olcDatabase=monitor)(olcDatabase={0}config)(&(objectClass=olcDatabaseConfig)(|(objectClass=olcBdbConfig)(objectClass=olcHdbConfig)(objectClass=olcMdbConfig)(objectClass=olcMonitorConfig))))")
+    databases = slapcat("(|(olcDatabase=monitor)(olcDatabase={0}config)(&(objectClass=olcDatabaseConfig)(|(objectClass=olcBdbConfig)(objectClass=olcHdbConfig)(objectClass=olcMdbConfig)(objectClass=olcMonitorConfig)(objectClass=olcRelayConfig))))")
 
     databases.split("\n\n").collect do |paragraph|
       suffix = nil
+      relay = nil
       index = nil
       backend = nil
       directory = nil
@@ -23,6 +24,7 @@ Puppet::Type.
       rootpw = nil
       readonly = nil
       sizelimit = nil
+      dbmaxsize = nil
       timelimit = nil
       updateref = nil
       dboptions = {}
@@ -30,10 +32,11 @@ Puppet::Type.
       syncusesubentry = nil
       syncrepl = nil
       limits = []
+      security = {}
       paragraph.gsub("\n ", "").split("\n").collect do |line|
         case line
         when /^olcDatabase: /
-          index, backend = line.match(/^olcDatabase: \{(\d+)\}(bdb|hdb|mdb|monitor|config)$/).captures
+          index, backend = line.match(/^olcDatabase: \{(\d+)\}(bdb|hdb|mdb|monitor|config|relay)$/).captures
         when /^olcDbDirectory: /
           directory = line.split(' ')[1]
         when /^olcRootDN: /
@@ -42,10 +45,14 @@ Puppet::Type.
           rootpw = Base64.decode64(line.split(' ')[1])
         when /^olcSuffix: /
           suffix = line.split(' ')[1]
+        when /^olcRelay: /
+          relay = line.split(' ')[1]
         when /^olcReadOnly: /i
           readonly = line.split(' ')[1]
         when /^olcSizeLimit: /i
           sizelimit = line.split(' ')[1]
+        when /^olcDbMaxSize: /i
+          dbmaxsize = line.split(' ')[1]
         when /^olcTimeLimit: /i
           timelimit = line.split(' ')[1]
         when /^olcUpdateref: /i
@@ -80,10 +87,15 @@ Puppet::Type.
         when /^olcSyncrepl: /
           syncrepl ||= []
           optvalue = line.split(' ',2)[1]
-          syncrepl.push(optvalue.match(/^(\{\d+\})?(.+)$/).captures[1]+"\n")
+          syncrepl.push(optvalue.match(/^(\{\d+\})?(.+)$/).captures[1])
         when /^olcLimits: /
           limit = line.match(/^olcLimits:\s+(\{\d+\})?(.+)$/).captures[1]
           limits << limit
+        when /^olcSecurity: /
+          line.split(': ')[1].split(' ').each do |variable|
+            values = variable.split('=')
+            security[values[0]] = values[1]
+          end
         end
       end
       if backend == 'monitor' and !suffix
@@ -96,6 +108,7 @@ Puppet::Type.
         :ensure          => :present,
         :name            => suffix,
         :suffix          => suffix,
+        :relay           => relay,
         :index           => index.to_i,
         :backend         => backend,
         :directory       => directory,
@@ -104,12 +117,14 @@ Puppet::Type.
         :readonly        => readonly,
         :sizelimit       => sizelimit,
         :timelimit       => timelimit,
+        :dbmaxsize       => dbmaxsize,
         :updateref       => updateref,
         :dboptions       => dboptions,
         :mirrormode      => mirrormode,
         :syncusesubentry => syncusesubentry,
         :syncrepl        => syncrepl,
-        :limits          => limits
+        :limits          => limits,
+        :security        => security
       )
     end
   end
@@ -193,7 +208,14 @@ Puppet::Type.
     t << "objectClass: olcDatabaseConfig\n"
     t << "objectClass: olc#{resource[:backend].to_s.capitalize}Config\n"
     t << "olcDatabase: #{resource[:backend]}\n"
-    if "#{resource[:backend]}" != "monitor"
+
+    case "#{resource[:backend]}"
+    when "relay"
+      t << "olcRelay: #{resource[:relay]}\n" if !resource[:relay].empty?
+      t << "olcSuffix: #{resource[:suffix]}\n" if resource[:suffix]
+    when "monitor"
+      # WRITE HERE FOR MONITOR ONLY
+    else
       t << "olcDbDirectory: #{resource[:directory]}\n" if resource[:directory]
       t << "olcSuffix: #{resource[:suffix]}\n" if resource[:suffix]
       t << "olcDbIndex: objectClass eq\n" if !resource[:dboptions] or !resource[:dboptions]['index']
@@ -202,6 +224,7 @@ Puppet::Type.
     t << "olcRootPW: #{resource[:rootpw]}\n" if resource[:rootpw]
     t << "olcReadOnly: #{resource[:readonly] == :true ? 'TRUE' : 'FALSE'}\n" if resource[:readonly]
     t << "olcSizeLimit: #{resource[:sizelimit]}\n" if resource[:sizelimit]
+    t << "olcDbMaxSize: #{resource[:dbmaxsize]}\n" if resource[:dbmaxsize]
     t << "olcTimeLimit: #{resource[:timelimit]}\n" if resource[:timelimit]
     t << "olcUpdateref: #{resource[:updateref]}\n" if resource[:updateref]
     if resource[:dboptions]
@@ -226,6 +249,7 @@ Puppet::Type.
     t << "olcMirrorMode: #{resource[:mirrormode] == :true ? 'TRUE' : 'FALSE'}\n" if resource[:mirrormode]
     t << "olcSyncUseSubentry: #{resource[:syncusesubentry]}\n" if resource[:syncusesubentry]
     t << "#{resource[:limits].collect { |x| "olcLimits: #{x}" }.join("\n")}\n" if resource[:limits] and !resource[:limits].empty?
+    t << "#{resource[:security].collect { |k, v| "olcSecurity: #{k}=#{v}" }.join("\n")}\n" if resource[:security] and !resource[:security].empty?
     t << "olcAccess: to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break\n"
     t << "olcAccess: to attrs=userPassword\n"
     t << "  by self write\n"
@@ -276,6 +300,10 @@ Puppet::Type.
     @property_flush[:suffix] = value
   end
 
+  def relay=(value)
+    @property_flush[:relay] = value
+  end
+
   def readonly=(value)
     @property_flush[:readonly] = value
   end
@@ -286,6 +314,10 @@ Puppet::Type.
 
   def timelimit=(value)
     @property_flush[:timelimit] = value
+  end
+
+  def dbmaxsize=(value)
+    @property_flush[:dbmaxsize] = value
   end
 
   def updateref=(value)
@@ -312,6 +344,10 @@ Puppet::Type.
     @property_flush[:limits] = value
   end
 
+  def security=(value)
+    @property_flush[:security] = value
+  end
+
   def flush
     if not @property_flush.empty?
       t = Tempfile.new('openldap_database')
@@ -321,10 +357,11 @@ Puppet::Type.
       t << "replace: olcRootDN\nolcRootDN: #{resource[:rootdn]}\n-\n" if @property_flush[:rootdn]
       t << "replace: olcRootPW\nolcRootPW: #{resource[:rootpw]}\n-\n" if @property_flush[:rootpw]
       t << "replace: olcSuffix\nolcSuffix: #{resource[:suffix]}\n-\n" if @property_flush[:suffix]
+      t << "replace: olcRelay\nolcRelay: #{resource[:relay]}\n-\n" if @property_flush[:relay]
       t << "replace: olcReadOnly\nolcReadOnly: #{resource[:readonly] == :true ? 'TRUE' : 'FALSE'}\n-\n" if @property_flush[:readonly]
       t << "replace: olcSizeLimit\nolcSizeLimit: #{resource[:sizelimit]}\n-\n" if @property_flush[:sizelimit]
       t << "replace: olcTimeLimit\nolcTimeLimit: #{resource[:timelimit]}\n-\n" if @property_flush[:timelimit]
-      t << "replace: olcUpdateref\nolcUpdateref: #{resource[:updateref]}\n-\n" if @property_flush[:updateref]
+      t << "replace: olcDbMaxSize\nolcDbMaxSize: #{resource[:dbmaxsize]}\n-\n" if @property_flush[:dbmaxsize]
       if @property_flush[:dboptions]
         if "#{resource[:synctype]}" == "inclusive" and !@property_hash[:dboptions].empty?
           @property_hash[:dboptions].keys.each do |k|
@@ -358,9 +395,11 @@ Puppet::Type.
         end
       end
       t << "replace: olcSyncrepl\n#{resource[:syncrepl].collect { |x| "olcSyncrepl: #{x}" }.join("\n")}\n-\n" if @property_flush[:syncrepl]
+      t << "replace: olcUpdateref\nolcUpdateref: #{resource[:updateref]}\n-\n" if @property_flush[:updateref]
       t << "replace: olcMirrorMode\nolcMirrorMode: #{resource[:mirrormode] == :true ? 'TRUE' : 'FALSE'}\n-\n" if @property_flush[:mirrormode]
       t << "replace: olcSyncUseSubentry\nolcSyncUseSubentry: #{resource[:syncusesubentry]}\n-\n" if @property_flush[:syncusesubentry]
       t << "replace: olcLimits\n#{@property_flush[:limits].collect { |x| "olcLimits: #{x}" }.join("\n")}\n-\n" if @property_flush[:limits]
+      t << "replace: olcSecurity\n#{@property_flush[:security].collect { |k, v| "olcSecurity: #{k}=#{v}" }.join("\n")}\n-\n" if @property_flush[:security]
       t.close
       Puppet.debug(IO.read t.path)
       begin
